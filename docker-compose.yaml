@@ -32,7 +32,7 @@ services:
     image: ghcr.io/grafana/grafana/grafana@sha256:3a829f0be4c8846dfc2e445931ac32489493b5f70df880a232923cd517ab9dd4 # 22532387845
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "80:3000"
     restart: unless-stopped
     user: "472"
     networks:
