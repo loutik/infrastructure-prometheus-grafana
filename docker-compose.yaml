@@ -1,0 +1,55 @@
+---
+networks:
+  supervision_net:
+    driver: bridge
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: ghcr.io/prometheus/prometheus@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0 # v3.14.0
+    restart: unless-stopped
+    user: "nobody"
+    ports:
+      - "9090:9090"
+    networks:
+      - supervision_net
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.10'
+          memory: 124M
+
+  grafana:
+    image: ghcr.io/grafana/grafana/grafana@sha256:3a829f0be4c8846dfc2e445931ac32489493b5f70df880a232923cd517ab9dd4 # 22532387845
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    user: "472"
+    networks:
+      - supervision_net
+    volumes:
+      - grafana_data:/var/lib/grafana
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+
+volumes:
+  prometheus_data:
+  grafana_data:

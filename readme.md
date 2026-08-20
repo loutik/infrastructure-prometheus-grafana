@@ -1,25 +1,14 @@
-# Template `README.md` pour les dépôts d’infrastructure
-
-## Prompt IA
-
-Tu es un ingénieur SRE senior garant du respect des bonnes pratiques de l’industrie. Ta mission est de rédiger le fichier `README.md` du projet en restant concis, clair et professionnel dans tes explications.
-
-Ci-dessous se trouve un template Markdown du `README.md`. Les commentaires entre crochets `[]` sont des instructions destinées à ton persona et ne doivent jamais apparaître dans le résultat final.
-
-Ta réponse doit contenir uniquement le résultat final, sans texte supplémentaire ni explication.
-
-Informations à prendre en compte :
-
-* [INSÉRER LES INFORMATIONS]
-
-````markdown
-# Infrastructure - <nom>
+# Infrastructure - Prometheus et Grafana
 
 ![Bannière Loutik](https://raw.githubusercontent.com/loutik/design-assets/main/banniere_loutik.png)
 
 ## Contexte
 
-[Présenter le contexte du dépôt, les objectifs du projet ainsi que la problématique résolue.]
+Ce dépôt contient le Docker Compose utilisé pour la supervision du projet Loutik. Il orchestre Prometheus pour la collecte et le stockage des métriques ainsi que Grafana pour leur visualisation.
+
+Le choix de Docker Compose simplifie le déploiement de la stack par Ansible sur une machine virtuelle. Ce dépôt sert également de base de référence à Ansible pour déployer Grafana en production sur la VM de monitoring. Par défaut, Grafana est configuré pour authentifier les utilisateurs via le SSO du projet. Les données Prometheus sont conservées pendant 15 jours dans le volume Docker, tandis que la configuration de Grafana est sauvegardée dans une instance PostgreSQL située à un autre endroit de l’infrastructure.
+
+La configuration fournie est destinée à l’environnement de développement. Le fichier `prometheus/prometheus.yml` doit être complété avec les cibles de supervision nécessaires avant toute utilisation fonctionnelle de Prometheus.
 
 -----
 
@@ -28,44 +17,88 @@ Informations à prendre en compte :
 L’organisation du dépôt suit la logique suivante :
 
 ```text
-[Génération de l’arborescence du projet avec les dossiers et fichiers importants]
+.
+├── .env.example
+├── docker-compose.yaml
+├── prometheus/
+│   └── prometheus.yml
+├── LICENSE.md
+└── readme.md
 ```
 
-- **`[<chemin>/]`** : [Description de l’utilité du dossier]
-- **`[<chemin>/<nom.extension>]`** : [Description de l’utilité du fichier]
+- **`.env.example`** : exemple des variables d’environnement nécessaires à Grafana, notamment pour le SSO OAuth et PostgreSQL.
+- **`docker-compose.yaml`** : définition des services Prometheus et Grafana, de leur réseau, de leurs volumes et de leurs limites de ressources.
+- **`prometheus/prometheus.yml`** : configuration Prometheus, montée en lecture seule dans le conteneur.
+- **`LICENSE.md`** : licence Creative Commons Attribution-ShareAlike 4.0 International.
 
 -----
 
-## Utilisation de [nom]
+## Utilisation en développement
 
 ### 1. Cloner le dépôt localement
 
 ```bash
-git clone [URL du dépôt]
-cd [Nom du dépôt]
+git clone https://github.com/loutik/infrastructure-prometheus-grafana.git
+cd infrastructure-prometheus-grafana
 ```
 
-### 2. [Action à réaliser]
+### 2. Préparer les variables d’environnement
 
-[Description de l’action]
+Copier le modèle avant de démarrer les conteneurs :
 
 ```bash
-[Exemple de commande]
+cp .env.example .env
 ```
 
-### 3. [Action suivante]
+Le fichier `.env.example` contient des paramètres d’intégration au SSO et à PostgreSQL. Pour un environnement de développement, remplacer les valeurs entre accolades par des identifiants de test et utiliser les endpoints autorisés pour cet environnement. Ne jamais versionner `.env` ni y placer de secret de production.
 
-[Ajouter autant d’étapes que nécessaire]
+### 3. Vérifier la configuration Compose
+
+```bash
+docker compose config
+```
+
+Cette commande valide la syntaxe du fichier Compose et la présence des variables référencées.
+
+### 4. Démarrer la supervision
+
+```bash
+docker compose up -d
+```
+
+Les interfaces sont alors accessibles sur :
+
+- Grafana : <http://localhost:3000>
+- Prometheus : <http://localhost:9090>
+
+Les ports doivent être protégés ou remappés si la machine est accessible depuis un réseau non fiable.
+
+### 5. Consulter les journaux et arrêter les services
+
+```bash
+docker compose logs -f prometheus grafana
+docker compose down
+```
+
+Pour supprimer également les volumes persistants et les données locales :
+
+```bash
+docker compose down -v
+```
 
 -----
 
-## Bonnes pratiques et sécurité
+## Bonnes pratiques
 
-1. **[Nom de la bonne pratique]** : [Description]
-2. **[Nom de la bonne pratique]** : [Description]
+1. **Authentification centralisée** : conserver l’authentification Grafana via le SSO et vérifier que les groupes OAuth correspondent aux rôles attendus (`Admin` et `Viewer`).
+2. **Protection des secrets** : ne jamais committer `.env`, les secrets OAuth ou le mot de passe PostgreSQL. Utiliser un gestionnaire de secrets dans les déploiements automatisés.
+3. **Images immuables** : conserver les images Docker épinglées par digest et valider toute mise à jour avant déploiement.
+4. **Accès réseau limité** : exposer Grafana et Prometheus derrière un reverse proxy avec TLS et limiter l’accès aux ports locaux ou au réseau de supervision.
+5. **Validation avant déploiement** : vérifier la configuration et l’état des services avant toute mise en production.
 
 ```bash
-[Commande à exécuter si nécessaire]
+docker compose config --quiet
+docker compose ps
 ```
 
 -----
@@ -78,6 +111,5 @@ cd [Nom du dépôt]
 
 <div align="center">
 <br>
-<small><i>Dernière mise à jour : [jour mois année — Exemple : 15 avril 2026]</i></small>
+<small><i>Dernière mise à jour : 20 août 2026</i></small>
 </div>
-````
