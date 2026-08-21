@@ -8,7 +8,6 @@
 # ⚠️ Toute modification manuelle sera écrasée. ⚠️
 # ---
 ---
-
 {% set exporters = {
     'node_exporter': 9100,
     'nginx_exporter': 9113,
@@ -20,19 +19,19 @@
     'kube_state_metrics': 8080
 } %}
 
-{% for target in pmt_targets %}
-{% if target.group in groups %}
-  {% for host in groups[target.group] %}
-    {% for exp_name, exp_port in exporters.items() %}
-      {% if target[exp_name] | default(false) %}
+{%- for target in pmt_targets %}
+{%- if target.group in groups %}
+{%- for host in groups[target.group] %}
+{%- for exp_name, exp_port in exporters.items() %}
+{%- if target[exp_name] | default(false) %}
 - targets:
     - '{{ hostvars[host]["ansible_host"] }}:{{ exp_port }}'
   labels:
     service: '{{ target.group }}'
     hostname: '{{ hostvars[host]["hostname"] | default(host) }}'
     exporter: '{{ exp_name }}'
-      {% endif %}
-    {% endfor %}
-  {% endfor %}
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
