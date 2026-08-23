@@ -50,6 +50,17 @@ services:
           cpus: '0.10'
           memory: 128M
 
+  pve-exporter:
+    image: ghcr.io/prometheus-pve/prometheus-pve-exporter@sha256:4867684c0a937716f11f770a32d32958bded507cf570fc334f774392afcb2f37 # 3.10
+    container_name: pve_exporter
+    restart: unless-stopped
+    networks:
+      - supervision_net
+    ports:
+      - "9221:9221"
+    volumes:
+      - ./pve-exporter/pve.yml:/etc/pve.yml:ro
+
 volumes:
   prometheus_data:
   grafana_data:
