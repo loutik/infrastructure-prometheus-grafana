@@ -20,18 +20,18 @@ scrape_configs:
       - files:
           - '/etc/prometheus/targets/hosts.yml' # Le chemin vu depuis l'INTÉRIEUR du conteneur
         refresh_interval: 1m
-- job_name: 'proxmox_exporter'
-    metrics_path: /pve
-    params:
-      module: [default]
-    file_sd_configs:
-      - files:
-          - '/etc/prometheus/targets/proxmox.yml'
-        refresh_interval: 1m
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: pve-exporter:9221
+  - job_name: 'proxmox_exporter'
+      metrics_path: /pve
+      params:
+        module: [default]
+      file_sd_configs:
+        - files:
+            - '/etc/prometheus/targets/proxmox.yml'
+          refresh_interval: 1m
+      relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: pve-exporter:9221
