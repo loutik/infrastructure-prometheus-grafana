@@ -54,6 +54,7 @@ services:
     image: ghcr.io/prometheus-pve/prometheus-pve-exporter@sha256:4867684c0a937716f11f770a32d32958bded507cf570fc334f774392afcb2f37 # 3.10
     container_name: pve_exporter
     restart: unless-stopped
+    user: "nobody"
     networks:
       - supervision_net
     ports:
