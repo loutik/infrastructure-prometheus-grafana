@@ -9,29 +9,15 @@
 # ⚠️ Toute modification manuelle sera écrasée. ⚠️
 # ---
 ---
-{% set exporters = {
-    'node_exporter': 9100,
-    'nginx_exporter': 9113,
-    'crowdsec_exporter': 6060,
-    'postgres_exporter': 9187,
-    'squid_exporter': 9301,
-    'powerdns_exporter': 9120,
-    'kube_state_metrics': 8080
-} %}
 
 {% for target in pmt_targets %}
-{% if target.group in groups %}
+{% if target.proxmox_exporter | default(false) and target.group in groups %}
 {% for host in groups[target.group] %}
-{% for exp_name, exp_port in exporters.items() %}
-{% if target[exp_name] | default(false) %}
 - targets:
-    - '{{ hostvars[host]["ansible_host"] }}:{{ exp_port }}'
+    - '{{ hostvars[host]["ansible_host"] }}'
   labels:
     service: '{{ target.group }}'
     hostname: '{{ hostvars[host]["hostname"] | default(host) }}'
-    exporter: '{{ exp_name }}'
-{% endif %}
-{% endfor %}
 {% endfor %}
 {% endif %}
 {% endfor %}

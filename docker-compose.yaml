@@ -59,7 +59,7 @@ services:
     ports:
       - "9221:9221"
     volumes:
-      - ./pve-exporter/pve.yml:/etc/pve.yml:ro
+      - ./pve-exporter/pve.yml:/etc/prometheus/pve.yml:ro
 
 volumes:
   prometheus_data:
