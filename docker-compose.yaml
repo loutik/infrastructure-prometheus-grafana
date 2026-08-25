@@ -63,6 +63,18 @@ services:
     volumes:
       - ./pve-exporter/pve.yml:/etc/prometheus/pve.yml:ro
 
+  pbs-exporter:
+    image: natrontech/pbs-exporter@sha256:d8101b91885fbab5d1ac70ba11e78dc52108c91580e5d9f1cd8df8ff1f0a2c68 # 0.9.3
+    container_name: pbs_exporter
+    restart: unless-stopped
+    user: "nobody"
+    networks:
+      - supervision_net
+    ports:
+      - "10019:10019"
+    volumes:
+      - ./pbs-exporter/pbs.yml:/etc/pbs-exporter/pbs.yml:ro
+
 volumes:
   prometheus_data:
   grafana_data:
