@@ -35,3 +35,17 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: pve-exporter:9221
+  - job_name: 'proxmox_backup_exporter'
+    metrics_path: /metrics
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/pbs.yml'
+        refresh_interval: 1m
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+        replacement: https://${1}:8007
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: __address__
+        replacement: pbs-exporter:10019

@@ -1,0 +1,23 @@
+# jinja2: trim_blocks: "true", lstrip_blocks: "true"
+# ---
+# Type        : Template de configuration des hosts Prometheus
+# Auteur      : Louis MEDO - louis.medo@loutik.fr
+# Role        : pmt-gfn-install
+# Objectif    : Découverte dynamique des cibles d'exportation
+# ---
+# Fichier généré dynamiquement par Ansible (Rôle : pmt-gfn-install)
+# ⚠️ Toute modification manuelle sera écrasée. ⚠️
+# ---
+---
+
+{% for target in pmt_targets %}
+{% if target.pbs_exporter | default(false) and target.group in groups %}
+{% for host in groups[target.group] %}
+- targets:
+    - '{{ hostvars[host]["ansible_host"] }}'
+  labels:
+    service: '{{ target.group }}'
+    hostname: '{{ hostvars[host]["hostname"] | default(host) }}'
+{% endfor %}
+{% endif %}
+{% endfor %}
